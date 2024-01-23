@@ -1,14 +1,17 @@
 package se.kth.iv1350.view;
 
-
+import logAPI.TotalRevenueFileOutput;
 import se.kth.iv1350.controller.*; 
 import se.kth.iv1350.integration.DatabaseFailureException;
 import se.kth.iv1350.integration.InvalidItemIdentifierException;
 
 public class view {
     controller contr;
+    private TotalRevenueView totalRevenueView; 
     public view(controller contr){
         this.contr = contr;
+        totalRevenueView = new TotalRevenueView();
+        contr.addObserver(totalRevenueView);
     }
     
     public void test(){
@@ -31,7 +34,7 @@ public class view {
         contr.pay(600.0); 
         System.out.println("\n");
         contr.getReceipt();
-        contr.endSale(); 
+        contr.finishSale(); 
 
 
         try{
@@ -50,7 +53,6 @@ public class view {
         contr.pay(600.0); 
         System.out.println("\n");
         contr.getReceipt();
-        contr.endSale(); 
+        contr.finishSale(); 
     }
 }
-
