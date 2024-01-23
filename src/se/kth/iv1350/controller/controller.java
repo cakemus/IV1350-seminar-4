@@ -1,12 +1,10 @@
 package se.kth.iv1350.controller;
 
+import java.util.*;
 import logAPI.FileLogger;
 import logAPI.TotalRevenueFileOutput;
 import se.kth.iv1350.integration.*;
 import se.kth.iv1350.model.*;
-import se.kth.iv1350.view.TotalRevenueView;
-
-import java.util.*; 
 
 /**
  * Creates the controller class. 
@@ -20,7 +18,7 @@ public class controller {
     public Printer printer; 
     private FileLogger logger;
     public double quantity; 
-    private TotalRevenueView totalRevenueView;
+    private List<SaleObserver> saleObservers = new ArrayList<>(); 
     private TotalRevenueFileOutput totalRevenueFileOutput;
     
     /**
@@ -35,17 +33,15 @@ public class controller {
         this.printer = printer;  
         logger = new FileLogger();
         totalRevenueFileOutput = new TotalRevenueFileOutput();
-        totalRevenueView = new TotalRevenueView();
+        saleObservers.add(totalRevenueFileOutput); 
     }
     /**
      * Creates a new Sale object and returns a SaleDTO object representing the current sale state.
      * @return sale.getSaleInfo() Returns the SaleDTO initialized at the beggining. 
      */
     public SaleDTO startSale() {
-        
         this.sale = new Sale();
-        sale.addSaleObserver(totalRevenueFileOutput);
-        sale.addSaleObserver(totalRevenueView);
+        sale.addSaleObserver(saleObservers);
         return sale.getSaleInfo();
     }
     /**
@@ -78,7 +74,6 @@ public class controller {
     public void pay(double paidAmount){
         
         payment = new Payment(paidAmount, sale.getSaleInfo().getRunningTotal());
-        sale.notifyObservers(sale.getSaleInfo().getRunningTotal()); 
         extAcc.updateAccounting(paidAmount);
         extInv.updateInventory(sale);
     }
@@ -88,9 +83,15 @@ public class controller {
         printer.printReceipt(receipt);
     }
 
-    public void endSale(){
-        for (Item item: sale.getItems()){
-           item.setQuantity(0.0);
-        }
+    /**
+     * Designates a SaleObserver
+     * @param saleObserver The observer 
+     */
+    public void addObserver(SaleObserver saleObserver){ 
+        saleObservers.add(saleObserver);
+    }
+
+    public void finishSale(){
+        sale.endSale();
     }
 }
